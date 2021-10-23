@@ -1,18 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+	"strconv"
 )
-
-type User struct {
-	name string
-	age  uint16
-}
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler)
+	mux.HandleFunc("/lab1", handler)
 
 	s := &http.Server{
 		Addr:    ":8080",
@@ -22,12 +17,23 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(isPalindrome("121"))
+	headerContentTtype := r.Header.Get("Content-Type")
+	if headerContentTtype != "application/x-www-form-urlencoded" {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+		return
+	}
+	r.ParseForm()
+	nums := r.Form["nums"]
+
+	result := isPalindrome(nums[0])
+	w.WriteHeader(200)
+	w.Write([]byte(strconv.FormatBool(result)))
+
 }
 
-func isPalindrome(input string) bool {
-	for i := 0; i < len(input)/2; i++ {
-		if input[i] != input[len(input)-i-1] {
+func isPalindrome(nums string) bool {
+	for i := 0; i < len(nums)/2; i++ {
+		if nums[i] != nums[len(nums)-i-1] {
 			return false
 		}
 	}
